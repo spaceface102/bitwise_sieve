@@ -17,13 +17,6 @@ int main(void)
 	uint64_t arraysize = (maxnumber/64) + 1;
 	uint64_t *sieve = malloc(arraysize*sizeof(uint64_t));
 	uint64_t checktill = sqrt(maxnumber);
-	uint64_t currnum = 3;
-	while(checktill--)
-	{
-		 
-	}
-	
-
 	//check number of 1s, inorder to check number of primes
 	free(sieve);
 }
