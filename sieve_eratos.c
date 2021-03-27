@@ -16,7 +16,8 @@ int main(void)
 	scanf("%lu", &maxnumber); */
 	uint64_t arraysize = (maxnumber/64) + 1;
 	uint64_t *sieve = malloc(arraysize*sizeof(uint64_t));
-	uint64_t checktill = sqrt(maxnumber);
+	memset(sieve, ~0, arraysize*sizeof(uint64_t));
+//	uint64_t checktill = sqrt(maxnumber);
 	//check number of 1s, inorder to check number of primes
 	free(sieve);
 }
