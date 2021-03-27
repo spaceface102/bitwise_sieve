@@ -3,6 +3,6 @@
 
 int main(void)
 {
-	printf("%ld\n", sizeof(~0L));
+	printf("%ld\n", sizeof(~0LU));
 	return 0;
 }
