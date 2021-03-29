@@ -63,7 +63,7 @@ int main(void)
 			for(currnum = checknum*2; currnum <= maxnumber; currnum += checknum)
 				/*"~(1<<(currnum&63))" == all 1's except in bit position (currnum&63) + 1*/
 				sievearray[currnum>>6] &= ~(1UL<<(currnum&63)); //>>6 == /64 && &63 == %64
-		checknum++;
+		checknum += 2; //skip all the even numbers since they are sure to be not PRIME
 	}
 
 	/*make sure to not count extra bits as prime that are outside of maxnumber range
