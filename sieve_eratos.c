@@ -32,25 +32,44 @@ int main(void)
 	I could still represent 99.9999999534% of the numbers that 2^64 -1
 	is able to cover. But I'm loaded with RAM so we chillin B) */
 	uint64_t checktill = sqrt(maxnumber); 
-	uint64_t arraysize = (maxnumber/64) + 1; //64 bits in 8 bytes
-	uint64_t sievearray = malloc(arraysize*sizeof(uint64_t));
-	uint64_t checknum = 2; //start with first prime
+	uint64_t arraysize = (maxnumber>>6) + 1; //64 bits in 8 bytes
+	//== arraysize*sizeof(uint64_t) since #<<3 == #*8 and sizeof(uint64_t) == 8    
+	uint64_t *sievearray = malloc(arraysize<<3); 
+	uint64_t checknum = 3; //start with second prime
 	uint64_t currnum; //counter
 
-	//set all bytes to 0xff
-	memset(sievearray, 0xff, arraysize*sizeof(uint64_t));
-	/*make bit number 0 and bit number 1 NOT prime by setting them == 0*/
-	sievearray[0] <<= 2;
+	//set memory value so every multiple of multiple of 2 is auto NOT prime
+	memset(sievearray, 0xaa, arraysize<<3);
 
+	/*make bit number 0 and bit number 1 NOT prime by setting them == 0
+	as well as keeping bit number 2 prime and any multiple of of 2 not prime*/
+	sievearray[0] = 0xaaaaaaaaaaaaaaac; //a == 1010 aka 0(meaning NOT prime) every mult of 2
+	/*c == 1100 since bit 0 and bit 1 not prime and bit 2 is prime only exception to the
+	"0 every 2 mult" rule. 0xac == 1010 1100 (start counting from right to left)*/
+	
 	//look for primes
-	while(checktill--)
-	{	
+	while(checknum <= checktill) //inclusive range
+	{	//NOTE: #>>6 == #/64 and &63 == %64
+
 		//check if current "checknum" is prime
-		if ( sievearray[checknum>>6]&(1<<(checknum&63)) ) //acts as bit mask
-			for(currnum = checknum+checknum; currnum < maxnumber; currnum += checknum)
-				sievearray[currnum>>6] &= ~(1<<(currnum&63)); //>>6 == /64 && &63 == %64
+		/*checknum>>6 divides checknum by 64 and is used to access the correct array
+		"&(1<<(checknum&63))" is the bit mask part where it will "bitwise and" the value
+		of the correct index of the sieverarray by 1 with checknum&63 lagging 0's 
+		(of course in base 2, binary) which will give me the value of the (checknum&63) + 1
+		bit in the current array, either 0 or 1. If bit == 1 then it is prime, if bit == 0 it 
+		is NOT prime and you should just skip the following processing*/
+		if ( sievearray[checknum>>6]&(1UL<<(checknum&63)) ) //acts as bit mask
+			//currnum = checknum*2 in order to ensure current prime stays prime (skipping checknum)
+			for(currnum = checknum*2; currnum <= maxnumber; currnum += checknum)
+				/*"~(1<<(currnum&63))" == all 1's except in bit position (currnum&63) + 1*/
+				sievearray[currnum>>6] &= ~(1UL<<(currnum&63)); //>>6 == /64 && &63 == %64
 		checknum++;
 	}
+
+	/*make sure to not count extra bits as prime that are outside of maxnumber range
+	need to do this since at minium every array index has 64 numbers due to having 64 bits*/
+	sievearray[arraysize - 1] &= (~0UL)>>(63 - (maxnumber&63));
+
 
 	//check number of 1s, inorder to check number of primes
 	uint64_t numberofprimes = 0;
@@ -58,7 +77,15 @@ int main(void)
 		for(;sievearray[i]; sievearray[i] &= sievearray[i] - 1, numberofprimes++);
 
 	printf("Number of primes: %lu\n", numberofprimes);
+
+/*
+	//which primes
+	uint64_t primenumber = 0;
+	for(uint64_t i = 0; i < arraysize; i++)
+		for(uint64_t j = 0; j < 64; j++, primenumber++)
+			if (sievearray[i]&(1UL<<j))
+				printf("%lu\n", primenumber);
+*/
 	free(sievearray);
 	return 0;
 }
-
